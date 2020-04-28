@@ -1,0 +1,66 @@
+service: serverless-rimac
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:Scan*
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/personTable
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:PutObject"
+#      Resource:
+#        Fn::Join:
+#          - ""
+#          - - "arn:aws:s3:::"
+#            - "Ref" : "ServerlessDeploymentBucket"
+#            - "/*"
+
+  environment:
+    DYNAMODB_PERSON_TABLE: personTable
+
+plugins:
+  - serverless-pseudo-parameters
+
+functions:
+  darthvader:
+    handler: handler.darthvader
+    events:
+      - http:
+          path: /darthvader
+          method: get
+
+  create-person:
+    handler: handler.create
+    events:
+      - http:
+          path: /person
+          method: post
+
+  find-person:
+    handler: handler.find
+    events:
+      - http:
+          path: /person/{name}
+          method: get
+
+resources:
+  Resources:
+    personTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: personTable
+        AttributeDefinitions:
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
