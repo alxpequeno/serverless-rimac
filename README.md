@@ -4,6 +4,7 @@ Ejemplo serverless framework con node.
 
 ## Instalación
 ```bash
+npm install
 serverless deploy
 ```
 
